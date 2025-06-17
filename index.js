@@ -10,5 +10,5 @@ const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
 mongoose.connect(process.env.MONGO_URI).then(() => {
     console.log('Connected to MongoDB');
-    app.listen(5000, () => console.log('Server running on port https://localhost:5000'));
+    app.listen(5000, () => console.log('Server running on https://story-generator-app-backend.onrender.com'));
 }).catch(err => console.log(err));
