@@ -142,8 +142,9 @@ router.post('/reset-password', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Check security answer (case-insensitive)
-    if (user.securityAnswer.toLowerCase().trim() !== securityAnswer.toLowerCase().trim()) {
+    const isAnswerCorrect = await bcrypt.compare(securityAnswer, user.securityAnswer);
+
+    if (!isAnswerCorrect) {
       return res.status(401).json({ message: 'Incorrect answer to security question' });
     }
 
