@@ -21,7 +21,7 @@ const authenticate = (req, res, next) => {
   }
 };
 router.post('/signup', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, securityQuestion, securityAnswer } = req.body;
 
     try {
         const existingUser = await User.findOne({ email });
@@ -30,14 +30,23 @@ router.post('/signup', async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ name, email, password: hashedPassword });
-        await newUser.save();
+        const hashedAnswer = await bcrypt.hash(securityAnswer, 10); // Secure the answer
 
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword,
+            securityQuestion,
+            securityAnswer: hashedAnswer
+        });
+
+        await newUser.save();
         res.status(201).json({ message: 'User registered successfully' });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err });
     }
 });
+
 
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
