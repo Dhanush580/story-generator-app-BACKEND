@@ -116,6 +116,48 @@ router.put('/profile', authenticate, async (req, res) => {
     res.status(500).json({ message: 'Error updating profile', error: err.message });
   }
 });
+router.get('/get-security-question', async (req, res) => {
+  try {
+    const { email } = req.query;
 
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({ securityQuestion: user.securityQuestion });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, securityAnswer, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check security answer (case-insensitive)
+    if (user.securityAnswer.toLowerCase().trim() !== securityAnswer.toLowerCase().trim()) {
+      return res.status(401).json({ message: 'Incorrect answer to security question' });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    await user.save();
+
+    return res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 module.exports = router;
